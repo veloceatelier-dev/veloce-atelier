@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VELOCE ATELIER | Páginas Web de Lujo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Outfit:wght@300;400;900&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g1:#8B6510;--g2:#C9A84C;--g3:#F0D080;--g4:#FFF0B0;
+  --gold:var(--g2);--glow:rgba(201,168,76,.2);--gmid:rgba(201,168,76,.3);
+  --pur:rgba(70,15,130,.3);--blk:#030202;--cream:#F0E8D0
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--blk);color:var(--cream);font-family:'Outfit',sans-serif;overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cd{position:fixed;width:7px;height:7px;background:var(--g3);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .12s,height .12s}
+#cr{position:fixed;width:30px;height:30px;border:1px solid rgba(201,168,76,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+#ct{position:fixed;inset:0;pointer-events:none;z-index:9997}
+
+/* CANVAS */
+#cv{position:fixed;inset:0;z-index:0}
+
+/* HUD */
+.hud{position:fixed;z-index:200;font-family:monospace;font-size:8px;color:var(--g2);letter-spacing:2px;opacity:.5}
+.htl{top:1.5rem;left:1.8rem}
+.hbr{bottom:1.5rem;right:1.8rem;text-align:right}
+@media(max-width:600px){.hud{display:none}}
+
+/* SIDENAV */
+.nav{position:fixed;right:1.4rem;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:.6rem}
+.nd{width:4px;height:4px;border-radius:50%;background:rgba(201,168,76,.2);cursor:pointer;transition:all .3s}
+.nd.on{background:var(--g2);transform:scale(2.2);box-shadow:0 0 8px var(--g2)}
+@media(max-width:600px){.nav{right:.7rem}}
+
+/* WRAP */
+.wrap{position:relative;z-index:10}
+section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:5rem 1.5rem}
+
+/* ═══ HERO ═══ */
+#hero{flex-direction:column;text-align:center;justify-content:flex-end;padding-bottom:8vh;overflow:hidden}
+
+.badge{
+  font-size:clamp(6px,1.2vw,9px);
+  letter-spacing:.5em;color:var(--g2);font-family:monospace;
+  opacity:0;transform:translateY(12px);
+  animation:fu .8s ease .3s forwards;
+  text-transform:uppercase;margin-bottom:1.2rem
+}
+
+/* TÍTULO — TAMAÑO FIJO SIN DESBORDAMIENTO */
+.htitle{
+  font-family:'Syncopate',sans-serif;
+  font-weight:700;line-height:.88;
+  letter-spacing:-.02em;text-transform:uppercase;
+  opacity:0;transform:translateY(30px);
+  animation:fu 1s ease .6s forwards;
+  width:100%;max-width:100vw;
+  overflow:hidden
+}
+.htitle .l1{
+  display:block;
+  font-size:clamp(2.8rem,9vw,9rem);
+  background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 30%,var(--g3) 52%,var(--g4) 65%,var(--g2) 80%,var(--g1) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 22px rgba(201,168,76,.5))
+}
+.htitle .l2{
+  display:block;
+  font-size:clamp(1.1rem,3.5vw,3.5rem);
+  color:transparent;
+  -webkit-text-stroke:1px rgba(201,168,76,.38);
+  letter-spacing:.08em
+}
+.htitle .l3{
+  display:block;
+  font-size:clamp(1.6rem,5vw,5rem);
+  background:linear-gradient(90deg,var(--g1),var(--g3),var(--g1));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px rgba(240,208,128,.4))
+}
+
+.hsub{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(.75rem,1.5vw,1.1rem);
+  color:rgba(240,232,208,.38);
+  margin-top:1.4rem;letter-spacing:.18em;
+  opacity:0;animation:fu .9s ease 1.2s forwards
+}
+.hsub b{color:var(--g2);font-weight:400}
+
+.hbtns{
+  margin-top:2rem;opacity:0;animation:fu .9s ease 1.7s forwards;
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap
+}
+
+/* ── BOTONES ── */
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.8rem 2rem;
+  font-family:monospace;font-size:clamp(7px,1.1vw,9px);
+  letter-spacing:.38em;text-transform:uppercase;
+  text-decoration:none;position:relative;overflow:hidden;
+  cursor:none;transition:color .35s,box-shadow .35s
+}
+.btn-p{
+  background:linear-gradient(135deg,rgba(139,101,16,.25),rgba(201,168,76,.1));
+  border:1px solid var(--g2);color:var(--g3)
+}
+.btn-p::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--g1),var(--g2));transform:translateX(-101%);transition:transform .38s cubic-bezier(.77,0,.175,1);z-index:0}
+.btn-p span{position:relative;z-index:1}
+.btn-p:hover{color:#000;box-shadow:0 0 28px rgba(201,168,76,.4)}.btn-p:hover::before{transform:translateX(0)}
+.btn-s{border:1px solid rgba(201,168,76,.25);color:rgba(201,168,76,.5)}
+.btn-s:hover{border-color:var(--g2);color:var(--g2)}
+
+/* SCROLL IND */
+.sind{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.3rem;opacity:0;animation:fu .8s ease 2.2s forwards}
+.sind p{font-size:6px;letter-spacing:.45em;color:rgba(201,168,76,.3);font-family:monospace}
+.sl{width:1px;height:38px;background:linear-gradient(to bottom,var(--g2),transparent);animation:sp 2s ease-in-out infinite}
+
+/* ═══ LABEL ═══ */
+.lbl{font-family:monospace;font-size:clamp(6px,1vw,8px);letter-spacing:.45em;color:var(--g2);display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;opacity:.75}
+.lbl::before{content:'';width:22px;height:1px;background:linear-gradient(to right,var(--g2),transparent)}
+
+/* ═══ SERVICIOS ═══ */
+#services{justify-content:center;padding:5rem 2rem}
+.sblock{width:100%;max-width:580px}
+
+.stitle{
+  font-family:'Syncopate',sans-serif;
+  font-size:clamp(1.5rem,4vw,3.2rem);
+  font-weight:700;line-height:.95;text-transform:uppercase;margin-bottom:1.4rem
+}
+.stitle em{
+  font-family:'Playfair Display',serif;font-style:italic;
+  background:linear-gradient(90deg,var(--g1),var(--g3),var(--g1));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-size:1.05em;display:block;
+  filter:drop-shadow(0 0 10px rgba(201,168,76,.28))
+}
+
+.sdesc{
+  font-size:clamp(.7rem,1.3vw,.82rem);
+  color:rgba(240,232,208,.36);line-height:2.2;
+  letter-spacing:.06em;
+  border-left:1px solid var(--gmid);padding-left:1.3rem;margin-bottom:2rem
+}
+
+.prow{display:flex;gap:1.2rem;flex-wrap:wrap}
+.pc{
+  flex:1;min-width:min(190px,100%);
+  padding:1.5rem 1.7rem;position:relative;
+  border:1px solid rgba(201,168,76,.22);
+  background:rgba(3,2,2,.65);backdrop-filter:blur(14px);
+  transition:border-color .3s,box-shadow .3s,transform .3s;cursor:none
+}
+.pc::before,.pc::after{content:'';position:absolute;width:11px;height:11px}
+.pc::before{top:-1px;right:-1px;border-top:1px solid var(--g2);border-right:1px solid var(--g2)}
+.pc::after{bottom:-1px;left:-1px;border-bottom:1px solid var(--g2);border-left:1px solid var(--g2)}
+.pc:hover{border-color:var(--g2);box-shadow:0 0 28px var(--glow),inset 0 0 18px var(--glow);transform:translateY(-3px)}
+.pc.ft{border-color:var(--g2);box-shadow:0 0 35px var(--glow)}
+.pt{font-size:6.5px;letter-spacing:.45em;color:var(--g2);font-family:monospace;margin-bottom:.6rem;opacity:.8}
+.pa{
+  font-family:'Syncopate',sans-serif;
+  font-size:clamp(1rem,2.2vw,1.6rem);font-weight:700;
+  background:linear-gradient(135deg,var(--g1),var(--g3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 7px rgba(201,168,76,.28))
+}
+.pi{font-size:.6rem;color:rgba(240,232,208,.26);margin-top:.3rem;letter-spacing:.07em}
+.pl{margin-top:.85rem;list-style:none;display:flex;flex-direction:column;gap:.32rem}
+.pl li{font-size:.6rem;color:rgba(240,232,208,.32);letter-spacing:.04em;padding-left:.85rem;position:relative}
+.pl li::before{content:'◆';position:absolute;left:0;font-size:.35rem;color:var(--g2);top:.15em}
+
+/* ═══ MANIFIESTO ═══ */
+#manifesto{text-align:center}
+.mw{max-width:750px}
+.qbig{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.8vw,2.5rem);line-height:1.5;
+  color:rgba(240,232,208,.7);position:relative;padding:1.5rem 1.5rem
+}
+.qbig::before{content:'\201C';position:absolute;top:-1.8rem;left:-.3rem;font-size:7rem;color:rgba(201,168,76,.07);font-family:'Playfair Display',serif;line-height:1}
+.qbig .h{
+  background:linear-gradient(90deg,var(--g1),var(--g3),var(--g2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 9px rgba(201,168,76,.32))
+}
+.qa{margin-top:1rem;font-size:7px;letter-spacing:.45em;color:rgba(201,168,76,.32);font-family:monospace}
+
+.lgrid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:2.8rem;border:1px solid rgba(201,168,76,.09)}
+.li{padding:1.6rem;border:1px solid rgba(201,168,76,.09);text-align:left;transition:background .3s;cursor:none}
+.li:hover{background:rgba(201,168,76,.05)}
+.ln{font-family:'Syncopate',sans-serif;font-size:1.9rem;font-weight:700;display:block;margin-bottom:.32rem;background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.38));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lt{font-size:.58rem;letter-spacing:.2em;color:var(--g2);font-family:monospace;margin-bottom:.32rem;opacity:.75}
+.ld{font-size:.58rem;color:rgba(240,232,208,.26);line-height:2}
+@media(max-width:600px){.lgrid{grid-template-columns:1fr}}
+
+/* ═══ PROCESO ═══ */
+#process{flex-direction:column;gap:0}
+.ptitle{
+  font-family:'Syncopate',sans-serif;
+  font-size:clamp(1.1rem,3vw,2.5rem);
+  text-transform:uppercase;text-align:center;margin-bottom:2.8rem
+}
+.steps{display:flex;max-width:900px;width:100%;position:relative}
+.steps::before{content:'';position:absolute;top:1.8rem;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gmid),transparent)}
+.step{flex:1;padding:3.6rem 1rem 1.4rem;text-align:center;position:relative}
+.sn{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:3.6rem;height:3.6rem;border-radius:50%;
+  border:1px solid var(--gmid);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syncopate',sans-serif;font-size:.65rem;color:var(--g2);
+  background:linear-gradient(135deg,rgba(139,101,16,.18),rgba(3,2,2,.95));
+  box-shadow:0 0 12px rgba(201,168,76,.12)
+}
+.sname{font-family:monospace;font-size:7px;letter-spacing:.25em;color:var(--g2);margin-bottom:.45rem;opacity:.75}
+.sdesc{font-size:.58rem;color:rgba(240,232,208,.26);line-height:2}
+@media(max-width:600px){.steps{flex-direction:column}.steps::before{display:none}}
+
+/* ═══ CTA ═══ */
+#cta{flex-direction:column;text-align:center;gap:1.5rem;overflow:hidden}
+#cta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(600px,90vw);height:min(600px,90vw);background:radial-gradient(circle,var(--pur) 0%,transparent 65%);pointer-events:none}
+.ctitle{
+  font-family:'Syncopate',sans-serif;
+  font-size:clamp(1.6rem,7vw,6.5rem);
+  text-transform:uppercase;line-height:.88;position:relative;z-index:1;
+  width:100%;max-width:100vw;overflow:hidden
+}
+.ctitle .sk{-webkit-text-stroke:1px rgba(201,168,76,.28);color:transparent}
+.ctitle .fi{background:linear-gradient(135deg,var(--g1),var(--g3),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(201,168,76,.32))}
+.csub{font-family:monospace;font-size:7px;letter-spacing:.4em;color:rgba(201,168,76,.3);max-width:340px;line-height:2.5;text-align:center}
+
+/* ═══ FOOTER ═══ */
+footer{position:relative;z-index:10;padding:2rem 3rem;border-top:1px solid rgba(201,168,76,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.flo{font-family:'Syncopate',sans-serif;font-size:clamp(.6rem,.9vw,.82rem);letter-spacing:.25em;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.fco{font-size:6.5px;letter-spacing:.25em;color:rgba(201,168,76,.2);font-family:monospace}
+@media(max-width:600px){footer{padding:1.5rem}}
+
+/* ═══ WHATSAPP LUJO ═══ */
+#wa{
+  position:fixed;bottom:1.8rem;left:1.8rem;z-index:500;
+  display:flex;align-items:center;gap:0;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .6s,transform .6s;
+  text-decoration:none;cursor:none
+}
+.wa-box{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.7rem 1.3rem .7rem .8rem;
+  background:linear-gradient(135deg,rgba(3,14,3,.95),rgba(4,20,4,.98));
+  border:1px solid rgba(37,211,102,.28);
+  border-radius:2px;
+  transition:border-color .3s,box-shadow .3s,transform .3s;
+  position:relative;overflow:hidden
+}
+.wa-box::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(37,211,102,.06),transparent);
+  pointer-events:none
+}
+/* esquinas de lujo */
+.wa-box::after{
+  content:'';position:absolute;
+  top:-1px;right:-1px;width:8px;height:8px;
+  border-top:1px solid rgba(37,211,102,.5);
+  border-right:1px solid rgba(37,211,102,.5)
+}
+#wa:hover .wa-box{border-color:rgba(37,211,102,.55);box-shadow:0 0 22px rgba(37,211,102,.18);transform:translateY(-2px)}
+.wa-ico{
+  width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#2edc6e,#1aa34a);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;box-shadow:0 0 12px rgba(37,211,102,.3)
+}
+.wa-ico::before{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:1px solid rgba(37,211,102,.25);
+  animation:wap 2.2s ease-in-out infinite
+}
+.wa-ico svg{width:17px;height:17px;fill:#fff}
+.wa-txt{display:flex;flex-direction:column;gap:.08rem}
+.wa-l{font-size:6.5px;letter-spacing:.35em;color:rgba(37,211,102,.55);font-family:monospace;text-transform:uppercase}
+.wa-n{font-size:9px;letter-spacing:.1em;color:rgba(37,211,102,.9);font-family:monospace;font-weight:600}
+/* línea dorada decorativa abajo */
+.wa-gold{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent)}
+
+@media(max-width:600px){#wa{bottom:1rem;left:1rem}.wa-box{padding:.6rem 1rem .6rem .7rem}}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(25px);transition:opacity .75s ease,transform .75s ease}
+.rv.on{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* GRAIN */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.02;pointer-events:none;z-index:1000}
+
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
+@keyframes sp{0%,100%{opacity:1}50%{opacity:.1}}
+@keyframes wap{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.5);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="cd"></div><div id="cr"></div><canvas id="ct"></canvas>
+<div id="cv"></div>
+
+<div class="hud htl">VELOCE // ATELIER</div>
+<div class="hud hbr" id="hsc">SCROLL_Y: 0000</div>
+
+<div class="nav">
+  <div class="nd on" onclick="goTo(0)"></div>
+  <div class="nd" onclick="goTo(1)"></div>
+  <div class="nd" onclick="goTo(2)"></div>
+  <div class="nd" onclick="goTo(3)"></div>
+  <div class="nd" onclick="goTo(4)"></div>
+</div>
+
+<!-- WHATSAPP LUJO -->
+<a id="wa" href="https://wa.me/573213229149?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20de%20lujo" target="_blank" rel="noopener">
+  <div class="wa-box">
+    <div class="wa-ico">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </div>
+    <div class="wa-gold"></div>
+  </div>
+</a>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section id="hero">
+    <p class="badge">PRESENCIA DIGITAL DE ÉLITE</p>
+    <h1 class="htitle">
+      <span class="l1">VELOCE</span>
+      <span class="l2">ATELIER</span>
+    </h1>
+    <p class="hsub">La diferencia entre ser visto y ser <b>deseado</b></p>
+    <div class="hbtns">
+      <a href="#services" class="btn btn-p"><span>DESCUBRIR</span></a>
+      <a href="https://wa.me/573213229149?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20de%20lujo" target="_blank" class="btn btn-s">HABLAR AHORA</a>
+    </div>
+    <div class="sind"><p>SCROLL</p><div class="sl"></div></div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section id="services">
+    <div class="sblock">
+      <h2 class="stitle rv d1">TU MARCA<em>En Otro Nivel</em></h2>
+      <!-- PSICOLOGÍA DE GREENE: no revelamos el método, vendemos el resultado -->
+      <p class="sdesc rv d2">Los grandes imperios no muestran sus armas. Solo muestran sus victorias. Nosotros creamos la presencia.</p>
+      <div class="prow rv d3">
+        <div class="pc">
+          <div class="pt">OBRA_01 // PRESENCIA</div>
+          <div class="pa">$2'900.000</div>
+          <div class="pi">COP · PRESENCIA DE ÉLITE</div>
+          <ul class="pl">
+            <li>Diseño exclusivo único</li>
+            <li>Experiencia visual</li>
+            <li>Optimizado móvil y escritorio</li>
+            <li> Arquitectura Web en .com + 30 días soporte</li>
+          </ul>
+        </div>
+        <div class="pc ft">
+          <div class="pt">OBRA_02 // IMPERIO ★</div>
+          <div class="pa">$4'500.000</div>
+          <div class="pi">COP · SISTEMA COMPLETO</div>
+          <ul class="pl">
+            <li>Todo lo del plan Presencia</li>
+            <li>Sistema de productos</li>
+            <li>Panel de administración propio</li>
+            <li>Integración de pagos en línea a tu cuenta</li>
+          </ul>
+        </div>
+        <div class="pc ft">
+          <div class="pt">OBRA_02 // IMPERIO ★</div>
+          <div class="pa">$8'500.000</div>
+          <div class="pi">COP · SISTEMA COMPLETO</div>
+          <ul class="pl">
+            <li>Todo lo del plan Presencia</li>
+            <li>Sistema de gestión de clientes</li>
+            <li>Panel de administración propio</li>
+            <li>Integración de pagos en línea</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFIESTO -->
+  <section id="manifesto">
+    <div class="mw">
+      <div class="qbig rv d1">
+        Tus competidores tienen <span class="h">páginas</span>.<br>
+        Tú tendrás un <span class="h">destino</span> al que la gente vuelve<br>
+        sin saber exactamente <span class="h">por qué.</span>
+      </div>
+      <div class="lgrid rv d3">
+        <div class="li">
+          <span class="ln">06</span>
+          <div class="lt">DOMINA LA ATENCIÓN</div>
+          <div class="ld">La primera impresión no se negocia. O capturas en los primeros 3 segundos, o pierdes para siempre.</div>
+        </div>
+        <div class="li">
+          <span class="ln">32</span>
+          <div class="lt">VENDE EL SUEÑO</div>
+          <div class="ld">No vendemos código. Vendemos la versión más poderosa de tu marca.</div>
+        </div>
+        <div class="li">
+          <span class="ln">37</span>
+          <div class="lt">SÉ INOLVIDABLE</div>
+          <div class="ld">Crear un espectáculo que nadie más puede replicar. Esa es nuestra única métrica de éxito.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESO — sin mencionar tecnología -->
+<section id="process">
+    <h2 class="ptitle rv d1">LA ARQUITECTURA <em style="font-family:'Playfair Display',serif;font-style:italic;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent">DEL PODER</em></h2>
+    <div class="steps rv d2">
+      <div class="step">
+        <div class="sn">01</div>
+        <div class="sname">CONCEPCIÓN</div>
+        <div class="sdesc">Definimos la identidad técnica y visual de tu proyecto para que proyecte autoridad absoluta.</div>
+      </div>
+      <div class="step">
+        <div class="sn">02</div>
+        <div class="sname">INGENIERÍA</div>
+        <div class="sdesc">Estructuramos tu ecosistema digital bajo los estándares más exigentes de rendimiento y fluidez.</div>
+      </div>
+      <div class="step">
+        <div class="sn">03</div>
+        <div class="sname">ESTÉTICA</div>
+        <div class="sdesc">Aplicamos capas de diseño inmersivo diseñadas para seducir y retener la atención de tu audiencia.</div>
+      </div>
+      <div class="step">
+        <div class="sn">04</div>
+        <div class="sname">DESPLIEGUE</div>
+        <div class="sdesc">Tu activo digital entra en operación con una infraestructura blindada, lista para dominar.</div>
+      </div>
+    </div>
+</section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="lbl rv" style="justify-content:center">SISTEMA_04 // ACCESO</div>
+    <!-- LEY 6: Escasez percibida. LEY 17: Mantén la incertidumbre -->
+    <h2 class="ctitle rv d1">
+      <span class="sk">POCOS</span><br>
+      <span class="fi">MERECEN</span><br>
+      <span class="sk">ESTO</span>
+    </h2>
+    <p class="csub rv d2">No trabajamos con todos.<br>Pero tú llegaste hasta aquí.<br>Eso dice algo sobre ti.</p>
+    <div class="rv d3">
+      <a href="https://wa.me/573213229149?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20de%20lujo" target="_blank" class="btn btn-p"><span>▶ SOLICITAR MI OBRA</span></a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="flo">VELOCE ATELIER</div>
+    <div class="fco">© 2026</div>
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// GPU ADAPTATIVO
+// ══════════════════════════════════════
+const isMobile = innerWidth < 768;
+let tier = 'mid';
+try{
+  const c=document.createElement('canvas');
+  const g=c.getContext('webgl');
+  if(g){
+    const d=g.getExtension('WEBGL_debug_renderer_info');
+    if(d){
+      const r=g.getParameter(d.UNMASKED_RENDERER_WEBGL).toLowerCase();
+      if(/intel|hd|uhd|620|630|iris/.test(r)) tier='low';
+      else if(/rtx|rx [5-9]|gtx 1[6-9]|gtx [2-9]/.test(r)) tier='high';
+    }
+  }
+}catch(e){}
+if(isMobile) tier='low';
+const Q={low:{seg:64,st:3000,nb:600,rk:7000,fb:3},mid:{seg:96,st:6000,nb:1500,rk:13000,fb:4},high:{seg:128,st:10000,nb:3000,rk:20000,fb:5}}[tier];
+
+// ══════════════════════════════════════
+// CURSOR + PARTÍCULAS
+// ══════════════════════════════════════
+const cd=document.getElementById('cd'),cr=document.getElementById('cr');
+const tc=document.getElementById('ct'),tx=tc.getContext('2d');
+tc.width=innerWidth;tc.height=innerHeight;
+window.addEventListener('resize',()=>{tc.width=innerWidth;tc.height=innerHeight});
+
+let mx=0,my=0,rx=0,ry=0;
+const pts=[];
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cd.style.left=mx+'px';cd.style.top=my+'px';
+  if(Math.random()>.6) pts.push({x:mx+(Math.random()-.5)*5,y:my+(Math.random()-.5)*5,vx:(Math.random()-.5)*1.1,vy:(Math.random()-.5)*1.1-.4,life:1,sz:Math.random()*2.2+.4});
+});
+document.addEventListener('click',()=>{
+  for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;pts.push({x:mx,y:my,vx:Math.cos(a)*2.8,vy:Math.sin(a)*2.8,life:1,sz:1.8});}
+  cd.style.width='20px';cd.style.height='20px';
+  setTimeout(()=>{cd.style.width='7px';cd.style.height='7px'},180);
+});
+document.querySelectorAll('a,.pc,.li,.nd').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cd.style.width='16px';cd.style.height='16px';cr.style.width='48px';cr.style.height='48px';cr.style.borderColor='rgba(240,208,128,.65)'});
+  el.addEventListener('mouseleave',()=>{cd.style.width='7px';cd.style.height='7px';cr.style.width='30px';cr.style.height='30px';cr.style.borderColor='rgba(201,168,76,.5)'});
+});
+(function aC(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  cr.style.left=rx+'px';cr.style.top=ry+'px';
+  tx.clearRect(0,0,tc.width,tc.height);
+  for(let i=pts.length-1;i>=0;i--){
+    const p=pts[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.035;p.vx*=.97;p.vy*=.97;p.life-=.042;
+    if(p.life<=0){pts.splice(i,1);continue;}
+    const a=p.life*.65;
+    const warm=p.life>.5;
+    tx.beginPath();
+    tx.arc(p.x,p.y,p.sz*p.life,0,Math.PI*2);
+    tx.fillStyle=warm?`rgba(240,208,128,${a})`:`rgba(201,168,76,${a})`;
+    tx.fill();
+  }
+  requestAnimationFrame(aC);
+})();
+
+// ══════════════════════════════════════
+// THREE.JS — JÚPITER CON GASES REALES
+// ══════════════════════════════════════
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,3000);
+const renderer=new THREE.WebGLRenderer({antialias:tier!=='low',alpha:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,tier==='low'?1:tier==='mid'?1.5:2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.0;
+document.getElementById('cv').appendChild(renderer.domElement);
+
+// ESTRELLAS
+const sG=new THREE.BufferGeometry();
+const sv=[],sc=[];
+for(let i=0;i<Q.st;i++){
+  sv.push((Math.random()-.5)*2800,(Math.random()-.5)*2800,(Math.random()-.5)*2800);
+  const b=.3+Math.random()*.7,w=Math.random()>.68;
+  sc.push(w?b*.9:b,w?b*.85:b,w?b*.52:b*1.08);
+}
+sG.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
+sG.setAttribute('color',new THREE.Float32BufferAttribute(sc,3));
+const stars=new THREE.Points(sG,new THREE.PointsMaterial({size:.5,vertexColors:true,transparent:true,opacity:.8}));
+scene.add(stars);
+
+// NEBULA
+const nG=new THREE.BufferGeometry();const nv=[],nc=[];
+for(let i=0;i<Q.nb;i++){
+  const r=20+Math.random()*70,th=Math.random()*Math.PI*2,ph=(Math.random()-.5)*.26*Math.PI;
+  nv.push(Math.cos(th)*Math.cos(ph)*r,Math.sin(ph)*r*.2,Math.sin(th)*Math.cos(ph)*r);
+  const t=Math.random();
+  if(t<.38)nc.push(.82,.70,.26);else if(t<.68)nc.push(.35,.07,.62);else nc.push(.1,.08,.25);
+}
+nG.setAttribute('position',new THREE.Float32BufferAttribute(nv,3));
+nG.setAttribute('color',new THREE.Float32BufferAttribute(nc,3));
+const nebula=new THREE.Points(nG,new THREE.PointsMaterial({size:.3,vertexColors:true,transparent:true,opacity:.15,blending:THREE.AdditiveBlending}));
+scene.add(nebula);
+
+// GRUPO JÚPITER
+const jG=new THREE.Group();scene.add(jG);
+const PS=isMobile?2.3:2.8;
+const FB=Q.fb;
+
+// SHADER — GASES VOLUMÉTRICOS CINEMATOGRÁFICOS
+const JV=`varying vec2 vUv;varying vec3 vN;varying vec3 vVD;
+void main(){vUv=uv;vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vVD=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`;
+
+const JF=`varying vec2 vUv;varying vec3 vN;varying vec3 vVD;
+uniform float uT;uniform vec3 uSD;
+float hh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float sn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1,0)),f.x),mix(hh(i+vec2(0,1)),hh(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<${FB};i++){v+=a*sn(p);p*=2.1;a*=.5;}return v;}
+
+void main(){
+  // GASES — múltiples capas de turbulencia
+  float t1=fbm(vec2(vUv.x*2.5+uT*.014,vUv.y*6.+uT*.004));
+  float t2=fbm(vec2(vUv.x*5.-uT*.019,vUv.y*14.+uT*.007))*.6;
+  float t3=fbm(vec2(vUv.x*9.+uT*.011,vUv.y*22.-uT*.005))*.3;
+  float turb=t1+t2*.5+t3*.3;
+
+  // Bandas de gas principal
+  float b=sin(vUv.y*20.+turb*3.+t2*2.);
+  float b2=sin(vUv.y*38.+turb*1.5)*.5;
+  float b3=sin(vUv.y*8.+t1*4.)*.3;
+
+  // PALETA — colores reales de los gases de Júpiter
+  vec3 cAmbar=vec3(.82,.56,.26);   // gas naranja-ámbar principal
+  vec3 cCafe =vec3(.50,.28,.12);   // bandas marrones profundas
+  vec3 cCrema=vec3(.92,.80,.60);   // zonas claras/frías
+  vec3 cOcre =vec3(.65,.40,.18);   // ocre intermedio
+  vec3 cBlanco=vec3(.94,.88,.70);  // zonas de alta presión
+  vec3 cRojo =vec3(.68,.22,.10);   // bandas rojizas
+  vec3 cPolo =vec3(.38,.18,.08);   // polos oscuros
+
+  float m1=smoothstep(-1.,1.,b);
+  float m2=smoothstep(-.4,.4,b2);
+  float m3=fbm(vUv*12.+uT*.008);
+
+  vec3 col=mix(cAmbar,cCafe,m1);
+  col=mix(col,cCrema,m2*.5);
+  col=mix(col,cOcre,b3*.35+.15);
+  col=mix(col,cBlanco,m3*.25);
+  col=mix(col,cRojo,fbm(vec2(vUv.x*4.,vUv.y*6.+uT*.003))*.2);
+
+  // Polos oscuros degradados
+  float lat=abs(vUv.y-.5)*2.;
+  col=mix(col,cPolo*.5,lat*lat*.55);
+
+  // ── GRAN MANCHA ROJA (icónica) ──
+  vec2 grs=(vUv-vec2(.62+sin(uT*.002)*.005,.365))*vec2(5.,8.5);
+  float gd=length(grs);float gm=smoothstep(1.,0.,gd);
+  float gsw=atan(grs.y,grs.x)+uT*.09;
+  float gi=fbm(vec2(cos(gsw)*gd*2.5,sin(gsw)*gd*2.5)*2.5);
+  vec3 gCol=mix(vec3(.78,.15,.06),vec3(.90,.42,.15),gi);
+  gCol=mix(gCol,vec3(.95,.65,.30),gi*gm*.3);
+  // Borde exterior de la mancha — más oscuro y definido
+  float gEdge=smoothstep(.7,1.,gd)*smoothstep(1.1,1.,gd)*gm;
+  gCol=mix(gCol,vec3(.45,.10,.04),gEdge*.6);
+  col=mix(col,gCol,gm*.92);
+
+  // Mancha oval secundaria
+  float sm=smoothstep(1.,0.,length((vUv-vec2(.24,.61))*vec2(7.,11.)))*.45;
+  col=mix(col,vec3(.60,.18,.08),sm);
+
+  // Pequeños remolinos turbulentos
+  float sw1=fbm(vec2(vUv.x*18.+uT*.02,vUv.y*18.))*.12;
+  col+=vec3(sw1*.3,sw1*.2,0.);
+
+  // ── ILUMINACIÓN 3D SOLAR ──
+  vec3 sun=normalize(uSD);
+  float diff=max(dot(vN,sun),0.);
+  col*=.12+diff*.88;
+
+  // Fresnel — borde oscuro realista
+  float fr=pow(1.-max(dot(vN,vVD),0.),4.);
+  col=mix(col,vec3(.02,.01,.005),fr*.82);
+
+  // Specular dorado
+  vec3 hd=normalize(sun+vVD);
+  float sp=pow(max(dot(vN,hd),0.),20.)*.16;
+  col+=vec3(sp*.92,sp*.76,sp*.3);
+
+  // Rim morado (efecto de atmósfera en el borde)
+  float rim=pow(1.-max(dot(vN,vVD),0.),5.)*diff;
+  col+=vec3(.10,.03,.25)*rim*.4;
+
+  // Corrección de color final — más dramático
+  col=pow(col,vec3(.9));
+  col*=1.1;
+  col=clamp(col,0.,1.);
+
+  gl_FragColor=vec4(col,1.);
+}`;
+
+const jupMat=new THREE.ShaderMaterial({vertexShader:JV,fragmentShader:JF,uniforms:{uT:{value:0},uSD:{value:new THREE.Vector3(.75,.28,.58).normalize()}}});
+const jup=new THREE.Mesh(new THREE.SphereGeometry(PS,Q.seg,Q.seg),jupMat);
+jG.add(jup);
+
+// ATMÓSFERAS VOLUMÉTRICAS — gases reales en capas
+// Cada capa simula una altitud de la atmósfera joviana
+const atmData=[
+  // [radio_extra, r,g,b, opacidad, potencia_fresnel]
+  [.10, .80,.42,.12, .50, 4.5],   // tropósfera — naranja
+  [.22, .90,.55,.18, .32, 5.2],   // estratósfera — ámbar
+  [.45, .85,.68,.22, .22, 6.0],   // dorada
+  [.85, .55,.28,.10, .14, 7.0],   // tenue naranja exterior
+  [1.4, .30,.06,.55, .12, 7.8],   // morada — ионосфера
+  [2.2, .18,.04,.40, .07, 9.0],   // halo exterior muy tenue
+];
+const atmVert=`varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+atmData.forEach(([dr,r,g,b,op,pw])=>{
+  jG.add(new THREE.Mesh(
+    new THREE.SphereGeometry(PS+dr,64,64),
+    new THREE.ShaderMaterial({
+      vertexShader:atmVert,
+      fragmentShader:`varying vec3 vN;void main(){float f=pow(1.-max(dot(vN,vec3(0,0,1)),0.),${pw.toFixed(1)});gl_FragColor=vec4(${r},${g},${b},f*${op});}`,
+      transparent:true,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false
+    })
+  ));
+});
+
+// ANILLOS
+const rG=new THREE.BufferGeometry();
+const rP=new Float32Array(Q.rk*3),rC=new Float32Array(Q.rk*3);
+for(let i=0;i<Q.rk;i++){
+  const rng=Math.random();let rad;
+  if(rng<.32)       rad=(PS+1.35)+Math.random()*.8;
+  else if(rng<.5)   rad=(PS+2.25)+Math.random()*.18;
+  else if(rng<.84)  rad=(PS+2.48)+Math.random()*1.25;
+  else              rad=(PS+3.85)+Math.random()*.5;
+  const a=Math.random()*Math.PI*2;
+  const sp=(Math.random()-.5)*(Math.random()<.12?.10:.035);
+  rP[i*3]=Math.cos(a)*rad;rP[i*3+1]=sp;rP[i*3+2]=Math.sin(a)*rad;
+  const t=Math.random();
+  if(t<.44){rC[i*3]=.72+Math.random()*.18;rC[i*3+1]=.58+Math.random()*.14;rC[i*3+2]=.22+Math.random()*.1;}
+  else if(t<.68){const g=.5+Math.random()*.28;rC[i*3]=g*.86;rC[i*3+1]=g;rC[i*3+2]=g*1.08;}
+  else if(t<.86){rC[i*3]=.55+Math.random()*.15;rC[i*3+1]=.33+Math.random()*.1;rC[i*3+2]=.13;}
+  else{rC[i*3]=.40+Math.random()*.18;rC[i*3+1]=.07;rC[i*3+2]=.50+Math.random()*.2;}
+}
+rG.setAttribute('position',new THREE.BufferAttribute(rP,3));
+rG.setAttribute('color',new THREE.BufferAttribute(rC,3));
+const rings=new THREE.Points(rG,new THREE.PointsMaterial({size:.015,vertexColors:true,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));
+jG.add(rings);
+jG.rotation.z=.26;
+
+// LUNAS
+const mD=[{s:.09,d:PS+5.,sp:.022,c:0xFFE055},{s:.07,d:PS+7.,sp:.016,c:0xC0D8FF},{s:.12,d:PS+9.5,sp:.011,c:0x907860},{s:.10,d:PS+12.,sp:.008,c:0x3A3535}];
+const mGr=new THREE.Group();jG.add(mGr);const moons=[];
+mD.forEach(d=>{
+  const m=new THREE.Mesh(new THREE.SphereGeometry(d.s,28,28),new THREE.MeshStandardMaterial({color:d.c,roughness:.82,metalness:.05}));
+  const pv=new THREE.Group();mGr.add(pv);pv.add(m);m.position.x=d.d;
+  pv.rotation.x=(Math.random()-.5)*.26;moons.push({pv,sp:d.sp});
+});
+
+// ILUMINACIÓN
+const sunL=new THREE.DirectionalLight(0xFFEAA0,2.8);sunL.position.set(8,3,6);scene.add(sunL);
+const purL=new THREE.PointLight(0x6015B8,2.0,42);purL.position.set(-10,5,-7);scene.add(purL);
+const rimL=new THREE.DirectionalLight(0x280870,.5);rimL.position.set(-5,0,-8);scene.add(rimL);
+scene.add(new THREE.AmbientLight(0x070510,1.5));
+camera.position.set(0,isMobile?.7:1.3,isMobile?9.8:9.2);
+
+// ══════════════════════════════════════
+// SCROLL
+// ══════════════════════════════════════
+let sY=0,tsY=0;
+window.addEventListener('scroll',()=>{
+  tsY=window.scrollY;
+  document.getElementById('hsc').textContent='SCROLL_Y: '+String(Math.round(tsY)).padStart(4,'0');
+  const ss=document.querySelectorAll('section'),ds=document.querySelectorAll('.nd');
+  ss.forEach((s,i)=>{const r=s.getBoundingClientRect();if(r.top<=innerHeight*.5&&r.bottom>=innerHeight*.5){ds.forEach(d=>d.classList.remove('on'));if(ds[i])ds[i].classList.add('on');}});
+});
+function goTo(i){document.querySelectorAll('section')[i]?.scrollIntoView({behavior:'smooth'});}
+
+// REVEAL
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('on');ro.unobserve(x.target);}});},{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+// WA delay
+setTimeout(()=>{const w=document.getElementById('wa');w.style.opacity='1';w.style.transform='translateY(0)';},3000);
+
+// ══════════════════════════════════════
+// RENDER LOOP — THROTTLE INTELIGENTE
+// ══════════════════════════════════════
+const clk=new THREE.Clock();
+let lastF=0;
+const CAP=tier==='low'?1000/38:1000/60;
+
+function animate(now=0){
+  requestAnimationFrame(animate);
+  if(now-lastF<CAP)return;
+  lastF=now;
+  const t=clk.getElapsedTime();
+
+  sY+=(tsY-sY)*.055;
+  const total=document.body.scrollHeight-innerHeight;
+  const sf=total>0?sY/total:0;
+
+  jupMat.uniforms.uT.value=t;
+
+  // Planeta se mueve con el scroll
+  jG.position.x=Math.sin(sf*Math.PI*1.6)*3.;
+  jG.position.y=-sf*4.5;
+  jG.rotation.y+=.001;
+
+  // Cámara cinematográfica
+  camera.position.z=(isMobile?9.8:9.2)-sf*3.5;
+  camera.position.y=(isMobile?.7:1.3)-sf*.65;
+  camera.lookAt(jG.position.x*.25,jG.position.y*.12,0);
+
+  // Respiración sutil
+  jup.scale.setScalar(1+Math.sin(t*.35)*.003);
+
+  moons.forEach(m=>m.pv.rotation.y+=m.sp);
+  rings.rotation.y+=.0005;
+  stars.rotation.y+=.00004;
+  nebula.rotation.y+=.00012;
+
+  // Pulso luz morada
+  purL.intensity=2.+Math.sin(t*.6)*.5;
+  purL.position.x=-10+Math.sin(t*.25)*2.;
+
+  // Sol orbita
+  sunL.position.x=8+Math.sin(t*.065);
+  sunL.position.y=3+Math.cos(t*.05)*.55;
+  jupMat.uniforms.uSD.value.set(sunL.position.x,sunL.position.y,sunL.position.z).normalize();
+
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
