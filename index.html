@@ -218,7 +218,7 @@ section{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,rgba(139,101,16,.18),rgba(3,2,2,.95));
   box-shadow:0 0 12px rgba(201,168,76,.12)
 }
-.sname{font-family:monospace;font-size:7px;letter-spacing:.25em;color:var(--g2);margin-bottom:.45rem;opacity:.75}
+.sname{font-family:monospace;font-size:7px;letter-spacing:.25em;color:var(--g2);margin-top: 1rem; margin-bottom:.45rem;opacity:.75}
 .sdesc{font-size:.58rem;color:rgba(240,232,208,.26);line-height:2}
 @media(max-width:600px){.steps{flex-direction:column}.steps::before{display:none}}
 
@@ -236,7 +236,17 @@ section{min-height:100vh;display:flex;align-items:center;justify-content:center;
 .csub{font-family:monospace;font-size:7px;letter-spacing:.4em;color:rgba(201,168,76,.3);max-width:340px;line-height:2.5;text-align:center}
 
 /* ═══ FOOTER ═══ */
-footer{position:relative;z-index:10;padding:2rem 3rem;border-top:1px solid rgba(201,168,76,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+footer {
+  position: relative;
+  z-index: 10;
+  padding: 2rem 3rem;
+  border-top: 1px solid rgba(201,168,76,.08);
+  display: flex;
+  justify-content: center; /* Esto centra todo horizontalmente */
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;               /* Espacio entre logo y copyright */
+}
 .flo{font-family:'Syncopate',sans-serif;font-size:clamp(.6rem,.9vw,.82rem);letter-spacing:.25em;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent}
 .fco{font-size:6.5px;letter-spacing:.25em;color:rgba(201,168,76,.2);font-family:monospace}
 @media(max-width:600px){footer{padding:1.5rem}}
@@ -344,7 +354,6 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       <a href="#services" class="btn btn-p"><span>DESCUBRIR</span></a>
       <a href="https://wa.me/573213229149?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20de%20lujo" target="_blank" class="btn btn-s">HABLAR AHORA</a>
     </div>
-    <div class="sind"><p></p><div class="sl"></div></div>
   </section>
 
   <!-- SERVICIOS -->
@@ -466,7 +475,6 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
   <footer>
     <div class="flo">VELOCE ATELIER</div>
-    <div class="fco">© 2026</div>
   </footer>
 </div>
 
